@@ -1631,7 +1631,7 @@ public class PlayerView extends FrameLayout implements AdViewProvider {
         onContentAspectRatioChanged(contentFrame, artworkLayoutAspectRatio);
         artworkView.setScaleType(scaleStyle);
         artworkView.setImageDrawable(drawable);
-        artworkView.setVisibility(VISIBLE);
+        artworkView.setVisibility(0);
         return true;
       }
     }
@@ -1735,7 +1735,7 @@ public class PlayerView extends FrameLayout implements AdViewProvider {
 
   private void closeShutter() {
     if (shutterView != null) {
-      shutterView.setVisibility(View.VISIBLE);
+      shutterView.setVisibility(View.INVISIBLE);
     }
   }
 

@@ -16,6 +16,8 @@
 
 package androidx.media3.effect;
 
+import androidx.annotation.RestrictTo;
+import androidx.annotation.RestrictTo.Scope;
 import java.util.concurrent.Executor;
 
 /**
@@ -27,8 +29,8 @@ import java.util.concurrent.Executor;
  *
  * @param <I> The type of the input {@link Frame}.
  */
-/* package */ interface FrameConsumer<I extends Frame> {
-
+@RestrictTo(Scope.LIBRARY_GROUP)
+public interface FrameConsumer<I extends Frame> {
   /**
    * Attempts to queue an input {@link Frame} for processing.
    *

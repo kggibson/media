@@ -102,6 +102,8 @@ public final class PlaybackVideoGraphWrapper implements VideoGraph.Listener {
      * @param videoFrameProcessingException The error.
      */
     default void onError(VideoFrameProcessingException videoFrameProcessingException) {}
+
+    default void onRender(long positionUs, long elapsedRealtimeUs) {}
   }
 
   /** A builder for {@link PlaybackVideoGraphWrapper} instances. */
@@ -677,6 +679,9 @@ public final class PlaybackVideoGraphWrapper implements VideoGraph.Listener {
    */
   private void render(long positionUs, long elapsedRealtimeUs) throws VideoSink.VideoSinkException {
     defaultVideoSink.render(positionUs, elapsedRealtimeUs);
+    for (Listener listener : listeners) {
+      listener.onRender(positionUs, elapsedRealtimeUs);
+    }
   }
 
   private void flush(boolean resetPosition) {

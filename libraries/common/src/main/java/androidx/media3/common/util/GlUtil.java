@@ -1,3 +1,4 @@
+
 /*
  * Copyright (C) 2018 The Android Open Source Project
  *
@@ -14,14 +15,13 @@
  * limitations under the License.
  */
 package androidx.media3.common.util;
-
 import static android.opengl.EGL14.EGL_CONTEXT_CLIENT_VERSION;
 import static android.opengl.GLU.gluErrorString;
 import static android.os.Build.VERSION.SDK_INT;
+import static android.util.Log.getStackTraceString;
 import static androidx.annotation.RestrictTo.Scope.LIBRARY_GROUP;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -48,12 +48,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import javax.microedition.khronos.egl.EGL10;
-
 /** OpenGL ES utilities. */
 @SuppressWarnings("InlinedApi") // GLES constants are used safely based on the API version.
 @UnstableApi
 public final class GlUtil {
-
   /** Thrown when an OpenGL error occurs. */
   public static final class GlException extends Exception {
     /** Creates an instance with the specified error message. */
@@ -61,10 +59,8 @@ public final class GlUtil {
       super(message);
     }
   }
-
   /** Number of elements in a 3d homogeneous coordinate vector describing a vertex. */
   public static final int HOMOGENEOUS_COORDINATE_VECTOR_SIZE = 4;
-
   /**
    * A max size to use when decoding bitmaps.
    *
@@ -75,33 +71,30 @@ public final class GlUtil {
   //  OpenGL context.
   @RestrictTo(LIBRARY_GROUP)
   public static final int MAX_BITMAP_DECODING_SIZE = 4096;
-
   /** Length of the normalized device coordinate (NDC) space, which spans from -1 to 1. */
   public static final float LENGTH_NDC = 2f;
-
   public static final int[] EGL_CONFIG_ATTRIBUTES_RGBA_8888 =
       new int[] {
-        EGL14.EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
-        EGL14.EGL_RED_SIZE, /* redSize= */ 8,
-        EGL14.EGL_GREEN_SIZE, /* greenSize= */ 8,
-        EGL14.EGL_BLUE_SIZE, /* blueSize= */ 8,
-        EGL14.EGL_ALPHA_SIZE, /* alphaSize= */ 8,
-        EGL14.EGL_DEPTH_SIZE, /* depthSize= */ 0,
-        EGL14.EGL_STENCIL_SIZE, /* stencilSize= */ 0,
-        EGL14.EGL_NONE
+          EGL14.EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
+          EGL14.EGL_RED_SIZE, /* redSize= */ 8,
+          EGL14.EGL_GREEN_SIZE, /* greenSize= */ 8,
+          EGL14.EGL_BLUE_SIZE, /* blueSize= */ 8,
+          EGL14.EGL_ALPHA_SIZE, /* alphaSize= */ 8,
+          EGL14.EGL_DEPTH_SIZE, /* depthSize= */ 0,
+          EGL14.EGL_STENCIL_SIZE, /* stencilSize= */ 0,
+          EGL14.EGL_NONE
       };
   public static final int[] EGL_CONFIG_ATTRIBUTES_RGBA_1010102 =
       new int[] {
-        EGL14.EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
-        EGL14.EGL_RED_SIZE, /* redSize= */ 10,
-        EGL14.EGL_GREEN_SIZE, /* greenSize= */ 10,
-        EGL14.EGL_BLUE_SIZE, /* blueSize= */ 10,
-        EGL14.EGL_ALPHA_SIZE, /* alphaSize= */ 2,
-        EGL14.EGL_DEPTH_SIZE, /* depthSize= */ 0,
-        EGL14.EGL_STENCIL_SIZE, /* stencilSize= */ 0,
-        EGL14.EGL_NONE
+          EGL14.EGL_RENDERABLE_TYPE, EGL14.EGL_OPENGL_ES2_BIT,
+          EGL14.EGL_RED_SIZE, /* redSize= */ 10,
+          EGL14.EGL_GREEN_SIZE, /* greenSize= */ 10,
+          EGL14.EGL_BLUE_SIZE, /* blueSize= */ 10,
+          EGL14.EGL_ALPHA_SIZE, /* alphaSize= */ 2,
+          EGL14.EGL_DEPTH_SIZE, /* depthSize= */ 0,
+          EGL14.EGL_STENCIL_SIZE, /* stencilSize= */ 0,
+          EGL14.EGL_NONE
       };
-
   // https://registry.khronos.org/OpenGL-Refpages/es3.0/html/glFenceSync.xhtml
   private static final long GL_FENCE_SYNC_FAILED = 0;
   // https://www.khronos.org/registry/EGL/extensions/EXT/EGL_EXT_protected_content.txt
@@ -119,50 +112,44 @@ public final class GlUtil {
   private static final int EGL_GL_COLORSPACE_BT2020_PQ_EXT = 0x3340;
   private static final int[] EGL_WINDOW_SURFACE_ATTRIBUTES_BT2020_PQ =
       new int[] {
-        EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_BT2020_PQ_EXT, EGL14.EGL_NONE, EGL14.EGL_NONE
+          EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_BT2020_PQ_EXT, EGL14.EGL_NONE, EGL14.EGL_NONE
       };
   private static final int EGL_GL_COLORSPACE_BT2020_HLG_EXT = 0x3540;
   private static final int[] EGL_WINDOW_SURFACE_ATTRIBUTES_BT2020_HLG =
       new int[] {
-        EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_BT2020_HLG_EXT, EGL14.EGL_NONE, EGL14.EGL_NONE
+          EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_BT2020_HLG_EXT, EGL14.EGL_NONE, EGL14.EGL_NONE
       };
   private static final int[] EGL_WINDOW_SURFACE_ATTRIBUTES_NONE = new int[] {EGL14.EGL_NONE};
-
   /** Class only contains static methods. */
   private GlUtil() {}
-
   /** Bounds of normalized device coordinates, commonly used for defining viewport boundaries. */
   public static float[] getNormalizedCoordinateBounds() {
     return new float[] {
-      -1, -1, 0, 1,
-      1, -1, 0, 1,
-      -1, 1, 0, 1,
-      1, 1, 0, 1
+        -1, -1, 0, 1,
+        1, -1, 0, 1,
+        -1, 1, 0, 1,
+        1, 1, 0, 1
     };
   }
-
   /** Typical bounds used for sampling from textures. */
   public static float[] getTextureCoordinateBounds() {
     return new float[] {
-      0, 0, 0, 1,
-      1, 0, 0, 1,
-      0, 1, 0, 1,
-      1, 1, 0, 1
+        0, 0, 0, 1,
+        1, 0, 0, 1,
+        0, 1, 0, 1,
+        1, 1, 0, 1
     };
   }
-
   /** Creates a 4x4 identity matrix. */
   public static float[] create4x4IdentityMatrix() {
     float[] matrix = new float[16];
     setToIdentity(matrix);
     return matrix;
   }
-
   /** Sets the input {@code matrix} to an identity matrix. */
   public static void setToIdentity(float[] matrix) {
     Matrix.setIdentityM(matrix, /* smOffset= */ 0);
   }
-
   /** Flattens the list of 4 element NDC coordinate vectors into a buffer. */
   public static float[] createVertexBuffer(List<float[]> vertexList) {
     float[] vertexBuffer = new float[HOMOGENEOUS_COORDINATE_VECTOR_SIZE * vertexList.size()];
@@ -176,7 +163,6 @@ public final class GlUtil {
     }
     return vertexBuffer;
   }
-
   /**
    * Returns whether creating a GL context with {@link #EXTENSION_PROTECTED_CONTENT} is possible.
    *
@@ -195,15 +181,13 @@ public final class GlUtil {
     }
     if (SDK_INT < 26
         && !context
-            .getPackageManager()
-            .hasSystemFeature(PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE)) {
+        .getPackageManager()
+        .hasSystemFeature(PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE)) {
       // Pre API level 26 devices were not well tested unless they supported VR mode.
       return false;
     }
-
     return isExtensionSupported(EXTENSION_PROTECTED_CONTENT);
   }
-
   /**
    * Returns whether the {@link #EXTENSION_SURFACELESS_CONTEXT} extension is supported.
    *
@@ -214,7 +198,6 @@ public final class GlUtil {
   public static boolean isSurfacelessContextExtensionSupported() throws GlException {
     return isExtensionSupported(EXTENSION_SURFACELESS_CONTEXT);
   }
-
   /**
    * Returns whether the {@link #EXTENSION_YUV_TARGET} extension is supported.
    *
@@ -237,10 +220,8 @@ public final class GlUtil {
     } else {
       glExtensions = GLES20.glGetString(GLES20.GL_EXTENSIONS);
     }
-
     return glExtensions != null && glExtensions.contains(EXTENSION_YUV_TARGET);
   }
-
   /** Returns whether the given {@link C.ColorTransfer} is supported. */
   public static boolean isColorTransferSupported(@C.ColorTransfer int colorTransfer)
       throws GlException {
@@ -251,19 +232,16 @@ public final class GlUtil {
     }
     return true;
   }
-
   /** Returns whether {@link #EXTENSION_COLORSPACE_BT2020_PQ} is supported. */
   public static boolean isBt2020PqExtensionSupported() throws GlException {
     // On API<33, the system cannot display PQ content correctly regardless of whether BT2020 PQ
     // GL extension is supported. Context: http://b/252537203#comment5.
     return SDK_INT >= 33 && isExtensionSupported(EXTENSION_COLORSPACE_BT2020_PQ);
   }
-
   /** Returns whether {@link #EXTENSION_COLORSPACE_BT2020_HLG} is supported. */
   public static boolean isBt2020HlgExtensionSupported() throws GlException {
     return isExtensionSupported(EXTENSION_COLORSPACE_BT2020_HLG);
   }
-
   /** Returns an initialized default {@link EGLDisplay}. */
   public static EGLDisplay getDefaultEglDisplay() throws GlException {
     EGLDisplay eglDisplay = EGL14.eglGetDisplay(EGL14.EGL_DEFAULT_DISPLAY);
@@ -279,7 +257,6 @@ public final class GlUtil {
     checkGlError();
     return eglDisplay;
   }
-
   /**
    * Creates a new {@link EGLContext} for the specified {@link EGLDisplay}.
    *
@@ -292,7 +269,6 @@ public final class GlUtil {
     return createEglContext(
         EGL14.EGL_NO_CONTEXT, eglDisplay, /* openGlVersion= */ 2, EGL_CONFIG_ATTRIBUTES_RGBA_8888);
   }
-
   /**
    * Creates a new {@link EGLContext} for the specified {@link EGLDisplay}.
    *
@@ -329,9 +305,10 @@ public final class GlUtil {
               + openGlVersion);
     }
     checkGlError();
+    Log.e("DANCHO", "createEglContext " + eglContext
+        + " trace " + getStackTraceString(new Exception()));
     return eglContext;
   }
-
   /**
    * Creates a new {@link EGLSurface} wrapping the specified {@code surface}.
    *
@@ -390,7 +367,6 @@ public final class GlUtil {
     checkEglException("Error creating a new EGL surface");
     return eglSurface;
   }
-
   /**
    * Creates a new {@link EGLSurface} wrapping a pixel buffer.
    *
@@ -404,9 +380,9 @@ public final class GlUtil {
       EGLDisplay eglDisplay, int width, int height, int[] configAttributes) throws GlException {
     int[] pbufferAttributes =
         new int[] {
-          EGL14.EGL_WIDTH, width,
-          EGL14.EGL_HEIGHT, height,
-          EGL14.EGL_NONE
+            EGL14.EGL_WIDTH, width,
+            EGL14.EGL_HEIGHT, height,
+            EGL14.EGL_NONE
         };
     EGLSurface eglSurface =
         EGL14.eglCreatePbufferSurface(
@@ -417,7 +393,6 @@ public final class GlUtil {
     checkEglException("Error creating a new EGL Pbuffer surface");
     return eglSurface;
   }
-
   /**
    * Creates and focuses a placeholder {@link EGLSurface}.
    *
@@ -438,11 +413,9 @@ public final class GlUtil {
         isSurfacelessContextExtensionSupported()
             ? EGL14.EGL_NO_SURFACE
             : createPbufferSurface(eglDisplay, /* width= */ 1, /* height= */ 1, configAttributes);
-
     focusEglSurface(eglDisplay, eglContext, eglSurface, /* width= */ 1, /* height= */ 1);
     return eglSurface;
   }
-
   /**
    * Returns the {@link EGL14#EGL_CONTEXT_CLIENT_VERSION} of the current context.
    *
@@ -460,7 +433,6 @@ public final class GlUtil {
     checkGlError();
     return currentEglContextVersion[0];
   }
-
   /**
    * Returns a newly created sync object and inserts it into the GL command stream.
    *
@@ -483,7 +455,6 @@ public final class GlUtil {
       return 0;
     }
   }
-
   /**
    * Deletes the underlying native object.
    *
@@ -493,12 +464,10 @@ public final class GlUtil {
     deleteSyncObjectQuietly(syncObject);
     checkGlError();
   }
-
   /** Releases the GL sync object if set, suppressing any error. */
   public static void deleteSyncObjectQuietly(long syncObject) {
     GLES30.glDeleteSync(syncObject);
   }
-
   /**
    * Ensures that following commands on the current OpenGL context will not be executed until the
    * sync point has been reached. If {@code syncObject} equals {@code 0}, this does not block the
@@ -513,12 +482,10 @@ public final class GlUtil {
       checkGlError();
     }
   }
-
   /** Gets the current {@link EGLContext context}. */
   public static EGLContext getCurrentContext() {
     return EGL14.eglGetCurrentContext();
   }
-
   /**
    * Collects all OpenGL errors that occurred since this method was last called and throws a {@link
    * GlException} with the combined error message.
@@ -542,7 +509,6 @@ public final class GlUtil {
       throw new GlException(errorMessageBuilder.toString());
     }
   }
-
   /**
    * Asserts the texture size is valid.
    *
@@ -562,7 +528,6 @@ public final class GlUtil {
     checkState(
         maxTextureSize > 0,
         "Create a OpenGL context first or run the GL methods on an OpenGL thread.");
-
     if (width < 0 || height < 0) {
       throw new GlException("width or height is less than 0");
     }
@@ -571,7 +536,6 @@ public final class GlUtil {
           "width or height is greater than GL_MAX_TEXTURE_SIZE " + maxTextureSize);
     }
   }
-
   /**
    * Fills the pixels in the current output render target buffers with (r=0, g=0, b=0, a=0).
    *
@@ -585,7 +549,6 @@ public final class GlUtil {
     GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
     GlUtil.checkGlError();
   }
-
   /**
    * Makes the specified {@code eglSurface} the render target, using a viewport of {@code width} by
    * {@code height} pixels.
@@ -595,7 +558,6 @@ public final class GlUtil {
       throws GlException {
     focusRenderTarget(eglDisplay, eglContext, eglSurface, /* framebuffer= */ 0, width, height);
   }
-
   /**
    * Makes the specified {@code framebuffer} the render target, using a viewport of {@code width} by
    * {@code height} pixels.
@@ -610,7 +572,6 @@ public final class GlUtil {
       throws GlException {
     focusRenderTarget(eglDisplay, eglContext, eglSurface, framebuffer, width, height);
   }
-
   /**
    * Makes the specified {@code framebuffer} the render target, using a viewport of {@code width} by
    * {@code height} pixels.
@@ -633,7 +594,6 @@ public final class GlUtil {
     GLES20.glViewport(/* x= */ 0, /* y= */ 0, width, height);
     checkGlError();
   }
-
   /**
    * Allocates a FloatBuffer with the given data.
    *
@@ -642,7 +602,6 @@ public final class GlUtil {
   public static FloatBuffer createBuffer(float[] data) {
     return (FloatBuffer) createBuffer(data.length).put(data).flip();
   }
-
   /**
    * Allocates a FloatBuffer.
    *
@@ -652,7 +611,6 @@ public final class GlUtil {
     ByteBuffer byteBuffer = ByteBuffer.allocateDirect(capacity * C.BYTES_PER_FLOAT);
     return byteBuffer.order(ByteOrder.nativeOrder()).asFloatBuffer();
   }
-
   /**
    * Creates a GL_TEXTURE_EXTERNAL_OES with default configuration of GL_LINEAR filtering and
    * GL_CLAMP_TO_EDGE wrapping.
@@ -662,7 +620,6 @@ public final class GlUtil {
     bindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, texId, GLES20.GL_LINEAR);
     return texId;
   }
-
   /**
    * Allocates a new texture, initialized with the {@link Bitmap bitmap} data and size.
    *
@@ -675,7 +632,6 @@ public final class GlUtil {
     setTexture(texId, bitmap);
     return texId;
   }
-
   /**
    * Allocates a new RGBA texture with the specified dimensions and color component precision.
    *
@@ -699,7 +655,6 @@ public final class GlUtil {
     }
     return createTextureUninitialized(width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE);
   }
-
   /**
    * Allocates a new {@linkplain GLES20#GL_RGBA normalized integer} {@link GLES30#GL_RGB10_A2}
    * texture with the specified dimensions.
@@ -727,7 +682,6 @@ public final class GlUtil {
         /* internalFormat= */ GLES30.GL_RGB10_A2,
         /* type= */ GLES30.GL_UNSIGNED_INT_2_10_10_10_REV);
   }
-
   /**
    * Allocates a new RGBA texture with the specified dimensions and color component precision.
    *
@@ -756,7 +710,6 @@ public final class GlUtil {
     checkGlError();
     return texId;
   }
-
   /** Returns a new, unbound GL texture identifier. */
   public static int generateTexture() throws GlException {
     int[] texId = new int[1];
@@ -764,7 +717,6 @@ public final class GlUtil {
     checkGlError();
     return texId[0];
   }
-
   /** Sets the {@code texId} to contain the {@link Bitmap bitmap} data and size. */
   public static void setTexture(int texId, Bitmap bitmap) throws GlException {
     assertValidTextureSize(bitmap.getWidth(), bitmap.getHeight());
@@ -772,7 +724,6 @@ public final class GlUtil {
     GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, /* level= */ 0, bitmap, /* border= */ 0);
     checkGlError();
   }
-
   /**
    * Binds the texture of the given type with the specified MIN and MAG sampling filter and
    * GL_CLAMP_TO_EDGE wrapping.
@@ -797,7 +748,6 @@ public final class GlUtil {
     GLES20.glTexParameteri(textureTarget, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
     checkGlError();
   }
-
   /**
    * Returns a new framebuffer for the texture.
    *
@@ -814,7 +764,6 @@ public final class GlUtil {
     checkGlError();
     return fboId[0];
   }
-
   /**
    * Deletes a GL texture.
    *
@@ -824,7 +773,6 @@ public final class GlUtil {
     GLES20.glDeleteTextures(/* n= */ 1, new int[] {textureId}, /* offset= */ 0);
     checkGlError();
   }
-
   /**
    * Destroys the {@link EGLContext} identified by the provided {@link EGLDisplay} and {@link
    * EGLContext}.
@@ -834,6 +782,7 @@ public final class GlUtil {
    */
   public static void destroyEglContext(
       @Nullable EGLDisplay eglDisplay, @Nullable EGLContext eglContext) throws GlException {
+    Log.e("DANCHO", "destroyEglContext " + eglContext);
     if (eglDisplay == null || eglDisplay.equals(EGL14.EGL_NO_DISPLAY)) {
       return;
     }
@@ -849,7 +798,6 @@ public final class GlUtil {
     EGL14.eglTerminate(eglDisplay);
     checkEglException("Error terminating display");
   }
-
   /**
    * Destroys the {@link EGLSurface} identified by the provided {@link EGLDisplay} and {@link
    * EGLSurface}.
@@ -862,24 +810,20 @@ public final class GlUtil {
     if (eglSurface == null || eglSurface.equals(EGL14.EGL_NO_SURFACE)) {
       return;
     }
-
     EGL14.eglDestroySurface(eglDisplay, eglSurface);
     checkEglException("Error destroying surface");
   }
-
   /** Deletes a framebuffer, or silently ignores the method call if {@code fboId} is unused. */
   public static void deleteFbo(int fboId) throws GlException {
     GLES20.glDeleteFramebuffers(/* n= */ 1, new int[] {fboId}, /* offset= */ 0);
     checkGlError();
   }
-
   /** Deletes a renderbuffer, or silently ignores the method call if {@code rboId} is unused. */
   public static void deleteRbo(int rboId) throws GlException {
     GLES20.glDeleteRenderbuffers(
         /* n= */ 1, /* renderbuffers= */ new int[] {rboId}, /* offset= */ 0);
     checkGlError();
   }
-
   /**
    * Copies the pixels from {@code readFboId} into {@code drawFboId}. Requires OpenGL ES 3.0.
    *
@@ -916,7 +860,6 @@ public final class GlUtil {
     GLES20.glBindFramebuffer(GLES20.GL_FRAMEBUFFER, /* framebuffer= */ boundFramebuffer[0]);
     checkGlError();
   }
-
   /**
    * Creates a pixel buffer object with a data store of the given size and usage {@link
    * GLES30#GL_DYNAMIC_READ}.
@@ -930,19 +873,15 @@ public final class GlUtil {
     int[] ids = new int[1];
     GLES30.glGenBuffers(/* n= */ 1, ids, /* offset= */ 0);
     GlUtil.checkGlError();
-
     GLES30.glBindBuffer(GLES30.GL_PIXEL_PACK_BUFFER, ids[0]);
     GlUtil.checkGlError();
-
     GLES30.glBufferData(
         GLES30.GL_PIXEL_PACK_BUFFER, /* size= */ size, /* data= */ null, GLES30.GL_DYNAMIC_READ);
     GlUtil.checkGlError();
-
     GLES30.glBindBuffer(GLES30.GL_PIXEL_PACK_BUFFER, /* buffer= */ 0);
     GlUtil.checkGlError();
     return ids[0];
   }
-
   /**
    * Reads pixel data from the {@link GLES30#GL_COLOR_ATTACHMENT0} attachment of a framebuffer into
    * the data store of a pixel buffer object.
@@ -970,7 +909,6 @@ public final class GlUtil {
     focusFramebufferUsingCurrentContext(readFboId, width, height);
     GLES30.glBindBuffer(GLES30.GL_PIXEL_PACK_BUFFER, bufferId);
     GlUtil.checkGlError();
-
     GLES30.glReadBuffer(GLES30.GL_COLOR_ATTACHMENT0);
     GLES30.glReadPixels(
         /* x= */ 0,
@@ -981,11 +919,9 @@ public final class GlUtil {
         GLES30.GL_UNSIGNED_BYTE,
         /* offset= */ 0);
     GlUtil.checkGlError();
-
     GLES30.glBindBuffer(GLES30.GL_PIXEL_PACK_BUFFER, /* buffer= */ 0);
     GlUtil.checkGlError();
   }
-
   /**
    * Maps the pixel buffer object's data store of a given size and returns a {@link ByteBuffer} of
    * OpenGL managed memory.
@@ -1023,7 +959,6 @@ public final class GlUtil {
     GlUtil.checkGlError();
     return mappedPixelBuffer;
   }
-
   /**
    * Unmaps the pixel buffer object {@code bufferId}'s data store.
    *
@@ -1048,13 +983,11 @@ public final class GlUtil {
     GLES30.glBindBuffer(GLES30.GL_PIXEL_PACK_BUFFER, /* buffer= */ 0);
     GlUtil.checkGlError();
   }
-
   /** Deletes a buffer object, or silently ignores the method call if {@code bufferId} is unused. */
   public static void deleteBuffer(int bufferId) throws GlException {
     GLES20.glDeleteBuffers(/* n= */ 1, new int[] {bufferId}, /* offset= */ 0);
     checkGlError();
   }
-
   /**
    * Throws a {@link GlException} with the given message if {@code expression} evaluates to {@code
    * false}.
@@ -1064,7 +997,6 @@ public final class GlUtil {
       throw new GlException(errorMessage);
     }
   }
-
   private static EGLConfig getEglConfig(EGLDisplay eglDisplay, int[] attributes)
       throws GlException {
     EGLConfig[] eglConfigs = new EGLConfig[1];
@@ -1081,13 +1013,11 @@ public final class GlUtil {
     }
     return eglConfigs[0];
   }
-
   private static boolean isExtensionSupported(String extensionName) throws GlException {
     EGLDisplay display = getDefaultEglDisplay();
     @Nullable String eglExtensions = EGL14.eglQueryString(display, EGL10.EGL_EXTENSIONS);
     return eglExtensions != null && eglExtensions.contains(extensionName);
   }
-
   private static void focusRenderTarget(
       EGLDisplay eglDisplay,
       EGLContext eglContext,
@@ -1100,7 +1030,6 @@ public final class GlUtil {
     checkEglException("Error making context current");
     focusFramebufferUsingCurrentContext(framebuffer, width, height);
   }
-
   private static void checkEglException(String errorMessage) throws GlException {
     int error = EGL14.eglGetError();
     if (error != EGL14.EGL_SUCCESS) {

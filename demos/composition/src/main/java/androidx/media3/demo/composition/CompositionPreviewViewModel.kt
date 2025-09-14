@@ -47,8 +47,10 @@ import androidx.media3.effect.MultipleInputVideoGraph
 import androidx.media3.effect.Presentation
 import androidx.media3.effect.RgbFilter
 import androidx.media3.effect.StaticOverlaySettings
+import androidx.media3.transformer.CachingGlObjectsProvider
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.CompositionPlayer
+import androidx.media3.transformer.DefaultRenderingFrameConsumer
 import androidx.media3.transformer.EditedMediaItem
 import androidx.media3.transformer.EditedMediaItemSequence
 import androidx.media3.transformer.Effects
@@ -132,6 +134,9 @@ class CompositionPreviewViewModel(application: Application, val compositionLayou
     // Load media items
     val titles = application.resources.getStringArray(/* id= */ R.array.preset_descriptions)
     val uris = application.resources.getStringArray(/* id= */ R.array.preset_uris)
+    //     val uris = application.resources.getStringArray(/* id= */ R.array.preset_uris).map {
+//       "file:///android_asset/images/transformer-output-from-100.mp4"
+//     }
     val durations = application.resources.getIntArray(/* id= */ R.array.preset_durations)
     for (i in titles.indices) {
       mediaItemOptions.add(
@@ -428,7 +433,11 @@ class CompositionPreviewViewModel(application: Application, val compositionLayou
   }
 
   private fun createCompositionPlayer(): CompositionPlayer {
+    val glExecutorService = Util.newSingleThreadExecutor("GLTHREAD")
     val playerBuilder = CompositionPlayer.Builder(getApplication())
+    playerBuilder.setGlObjectsProvider(CachingGlObjectsProvider())
+    playerBuilder.setGlExecutor(glExecutorService);
+    playerBuilder.experimentalSetFrameConsumer(DefaultRenderingFrameConsumer(glExecutorService))
     if (compositionLayout != COMPOSITION_LAYOUT[0]) {
       playerBuilder.setVideoGraphFactory(MultipleInputVideoGraph.Factory())
     }

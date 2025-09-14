@@ -20,8 +20,12 @@ import androidx.media3.common.GlTextureInfo;
 import androidx.media3.common.util.Consumer;
 import java.util.concurrent.Executor;
 
+import androidx.annotation.RestrictTo;
+import androidx.annotation.RestrictTo.Scope;
+
 /** A {@link Frame} implementation that wraps a {@link GlTextureInfo}. */
-/* package */ class GlTextureFrame implements Frame {
+@RestrictTo(Scope.LIBRARY_GROUP)
+public class GlTextureFrame implements Frame {
 
   /** Metadata associated with a {@link GlTextureFrame}. */
   public static class Metadata implements Frame.Metadata {

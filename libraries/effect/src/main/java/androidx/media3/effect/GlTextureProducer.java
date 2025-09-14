@@ -44,6 +44,8 @@ public interface GlTextureProducer {
         long presentationTimeUs,
         long syncObject)
         throws VideoFrameProcessingException, GlUtil.GlException;
+
+    default void flush() {}
   }
 
   /** Releases the output texture at the given {@code presentationTimeUs}. */

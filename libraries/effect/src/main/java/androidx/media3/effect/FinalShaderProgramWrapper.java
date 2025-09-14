@@ -170,7 +170,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
         && outputTextureTimestamps.element() <= presentationTimeUs) {
       outputTexturePool.freeTexture();
       outputTextureTimestamps.remove();
-      GlUtil.deleteSyncObject(syncObjects.remove());
+//      GlUtil.deleteSyncObject(syncObjects.remove());
       inputListener.onReadyToAcceptInputFrame();
     }
   }
@@ -286,6 +286,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
       outputTexturePool.freeAllTextures();
       outputTextureTimestamps.clear();
       syncObjects.clear();
+      textureOutputListener.flush();
     }
 
     // Drops all frames that aren't rendered yet.

@@ -27,8 +27,10 @@ import androidx.media3.common.GlObjectsProvider;
 import androidx.media3.common.GlTextureInfo;
 import androidx.media3.common.util.GlUtil;
 import androidx.media3.common.util.UnstableApi;
+import androidx.media3.common.util.Util;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 // TODO(b/261820382): Add tests for sharing context.
 /**
@@ -43,6 +45,7 @@ public final class DefaultGlObjectsProvider implements GlObjectsProvider {
 
   private final EGLContext sharedEglContext;
   private final List<EGLContext> createdEglContexts;
+  private final ExecutorService glExecutorService;
 
   /** Creates an instance with no shared EGL context. */
   public DefaultGlObjectsProvider() {
@@ -56,6 +59,7 @@ public final class DefaultGlObjectsProvider implements GlObjectsProvider {
    */
   public DefaultGlObjectsProvider(@Nullable EGLContext sharedEglContext) {
     this.sharedEglContext = sharedEglContext != null ? sharedEglContext : EGL14.EGL_NO_CONTEXT;
+    this.glExecutorService = Util.newSingleThreadExecutor("DefaultGlObjectsProvider:GLTHREAD");
     createdEglContexts = new ArrayList<>();
   }
 
